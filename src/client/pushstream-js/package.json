@@ -1,0 +1,46 @@
+{
+  "name": "pushstream-js",
+  "version": "0.1.0",
+  "description": "Lightweight JavaScript client for PushStream SSE events",
+  "main": "dist/pushstream.cjs.js",
+  "module": "dist/pushstream.esm.js",
+  "browser": "dist/pushstream.min.js",
+  "exports": {
+    ".": {
+      "import": "./dist/pushstream.esm.js",
+      "require": "./dist/pushstream.cjs.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "test": "node --test tests/*.test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "rollup": "^4.9.0",
+    "@rollup/plugin-terser": "^0.4.4"
+  },
+  "keywords": [
+    "sse",
+    "server-sent-events",
+    "eventsource",
+    "realtime",
+    "push",
+    "stream"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
