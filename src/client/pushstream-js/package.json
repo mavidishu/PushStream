@@ -1,19 +1,44 @@
 {
   "name": "pushstream-js",
   "version": "0.1.0",
-  "description": "Lightweight JavaScript client for PushStream SSE events",
+  "description": "Lightweight JavaScript client for PushStream SSE events with auto-reconnection and event-driven API",
+  "author": "Dishu Mavi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mavidishu/PushStream.git",
+    "directory": "src/client/pushstream-js"
+  },
+  "homepage": "https://github.com/mavidishu/PushStream#readme",
+  "bugs": {
+    "url": "https://github.com/mavidishu/PushStream/issues"
+  },
+  "keywords": [
+    "sse",
+    "server-sent-events",
+    "eventsource",
+    "realtime",
+    "push",
+    "stream",
+    "real-time",
+    "events"
+  ],
   "main": "dist/pushstream.cjs.js",
   "module": "dist/pushstream.esm.js",
   "browser": "dist/pushstream.min.js",
+  "unpkg": "dist/pushstream.min.js",
+  "jsdelivr": "dist/pushstream.min.js",
   "exports": {
     ".": {
       "import": "./dist/pushstream.esm.js",
-      "require": "./dist/pushstream.cjs.js"
+      "require": "./dist/pushstream.cjs.js",
+      "browser": "./dist/pushstream.min.js"
     }
   },
   "files": [
     "dist",
-    "src"
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "type": "module",
@@ -25,20 +50,6 @@
   "devDependencies": {
     "rollup": "^4.9.0",
     "@rollup/plugin-terser": "^0.4.4"
-  },
-  "keywords": [
-    "sse",
-    "server-sent-events",
-    "eventsource",
-    "realtime",
-    "push",
-    "stream"
-  ],
-  "author": "",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": ""
   },
   "engines": {
     "node": ">=18.0.0"
