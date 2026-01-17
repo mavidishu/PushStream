@@ -1,23 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>PushStream.AspNetCore</RootNamespace>
-    <Description>ASP.NET Core integration for PushStream SSE abstraction library</Description>
-    <Authors>PushStream Contributors</Authors>
-    <PackageId>PushStream.AspNetCore</PackageId>
-    <Version>0.1.0</Version>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>PushStream.AspNetCore</RootNamespace>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+		<!-- Package Metadata -->
+		<PackageId>PushStream.AspNetCore</PackageId>
+		<Version>0.1.0</Version>
+		<Authors>Dishu Mavi</Authors>
+		<Company>PushStream</Company>
+		<Description>ASP.NET Core integration for PushStream - a simple, opinionated abstraction over Server-Sent Events (SSE) for real-time server-to-client communication.</Description>
+		<PackageTags>sse;server-sent-events;real-time;aspnetcore;push;streaming;dotnet</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/mavidishu/PushStream</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/mavidishu/PushStream</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\PushStream.Core\PushStream.Core.csproj" />
-  </ItemGroup>
+	<!-- Framework Reference -->
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<!-- Development: Project Reference -->
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<ProjectReference Include="..\PushStream.Core\PushStream.Core.csproj" />
+	</ItemGroup>
+
+	<!-- Release: Package Reference for NuGet publishing -->
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<PackageReference Include="PushStream.Core" Version="0.1.0" />
+	</ItemGroup>
+
+	<!-- Include README in package -->
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 </Project>
-

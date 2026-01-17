@@ -1,49 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>PushStream.Core</RootNamespace>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>PushStream.Core</RootNamespace>
 
-    <!-- Generate XML docs -->
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-
-    <!-- Package Metadata -->
-    <PackageId>PushStream.Core</PackageId>
-    <Version>0.1.0-alpha</Version>
-    <Authors>Dishu Mavi</Authors>
-    <Description>
-      Framework-agnostic core library for Server-Sent Events (SSE) abstraction.
-      Real-time server push without the complexity.
-    </Description>
-    <PackageTags>sse;server-sent-events;real-time;push;events;streaming</PackageTags>
-
-    <!-- License and Repository -->
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/mavidishu/PushStream</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/mavidishu/PushStream</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-
-    <!-- README -->
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-
-    <!-- Copyright -->
-    <Copyright>Copyright © 2026 Dishu Mavi</Copyright>
-
-    <!-- NuGet -->
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-
-    <!-- Source Link -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="../../../README.md" Pack="true" PackagePath="/" />
-  </ItemGroup>
+		<!-- Package Metadata -->
+		<PackageId>PushStream.Core</PackageId>
+		<Version>0.1.0</Version>
+		<Authors>Dishu Mavi</Authors>
+		<Company>PushStream</Company>
+		<Description>Framework-agnostic core library for PushStream - a simple, opinionated abstraction over Server-Sent Events (SSE) for real-time server-to-client communication.</Description>
+		<PackageTags>sse;server-sent-events;real-time;push;streaming;dotnet</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/mavidishu/PushStream</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/mavidishu/PushStream</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
 
 </Project>
+
+
+
