@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dishumavi/PushStream.git",
+    "url": "https://github.com/mavidishu/PushStream.git",
     "directory": "src/client/pushstream-js"
   },
-  "homepage": "https://github.com/dishumavi/PushStream#readme",
+  "homepage": "https://github.com/mavidishu/PushStream#readme",
   "bugs": {
-    "url": "https://github.com/dishumavi/PushStream/issues"
+    "url": "https://github.com/mavidishu/PushStream/issues"
   },
   "keywords": [
     "sse",
