@@ -165,14 +165,15 @@ Clear non-goals prevent scope creep and keep the project focused.
 PushStream/
 ├── src/
 │   ├── server/
-│   │   ├── PushStream.Core/        # Core abstractions
-│   │   ├── PushStream.AspNetCore/  # [ASP.NET](http://asp.net/) integration
-│   │   └── PushStream.DemoApi/     # Sample API
+│   │   ├── PushStream.Core/         # Core abstractions (NuGet)
+│   │   ├── PushStream.AspNetCore/   # ASP.NET Core integration (NuGet)
+│   │   └── PushStream.DemoApi/      # Demo application
 │   └── client/
-│       └── pushstream-js/          # JS/TS client
-├── samples/
-│   └── TaskProgress/               # End-to-end example
+│       └── pushstream-js/           # JavaScript client (npm: pushstream-client)
 ├── tests/
+│   ├── PushStream.Core.Tests/
+│   └── PushStream.AspNetCore.Tests/
 ├── docs/
-└── [README.md](http://readme.md/)
+├── specs/
+└── README.md
 ```
