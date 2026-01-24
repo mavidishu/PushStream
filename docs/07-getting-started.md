@@ -24,7 +24,7 @@ dotnet add package PushStream.AspNetCore
 ### Client (npm)
 
 ```bash
-npm install pushstream-js
+npm install pushstream-client
 ```
 
 ---
@@ -105,7 +105,7 @@ public class OrderService
 ### Using the JavaScript Client
 
 ```javascript
-import { EventClient } from 'pushstream-js';
+import { EventClient } from 'pushstream-client';
 
 // Create client instance
 const client = new EventClient('/events');

@@ -26,6 +26,8 @@
   "main": "dist/pushstream.cjs.js",
   "module": "dist/pushstream.esm.js",
   "browser": "dist/pushstream.min.js",
+  "types": "dist/pushstream.d.ts",
+  "typings": "dist/pushstream.d.ts",
   "unpkg": "dist/pushstream.min.js",
   "jsdelivr": "dist/pushstream.min.js",
   "exports": {
@@ -49,7 +51,8 @@
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
-    "rollup": "^4.9.0"
+    "rollup": "^4.9.0",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.0.0"

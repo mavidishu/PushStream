@@ -1,46 +1,31 @@
-# PushStream
+# pushstream-client
 
-[![NuGet - Core](https://img.shields.io/nuget/v/PushStream.Core?label=PushStream.Core)](https://www.nuget.org/packages/PushStream.Core)
-[![NuGet - AspNetCore](https://img.shields.io/nuget/v/PushStream.AspNetCore?label=PushStream.AspNetCore)](https://www.nuget.org/packages/PushStream.AspNetCore)
-[![npm](https://img.shields.io/npm/v/pushstream-client)](https://www.npmjs.com/package/pushstream-client)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A lightweight, zero-dependency JavaScript client for consuming Server-Sent Events (SSE) with automatic reconnection, event subscriptions, and connection state management.
 
-**Real-time server push without the complexity.**
+## Features
 
-PushStream is an opinionated abstraction over Server-Sent Events (SSE) that makes implementing real-time server-to-client updates simple, safe, and maintainable.
-
----
-
-## Why PushStream?
-
-Most real-time features only need **one-way communication** — the server pushing updates to clients:
-
-- Task progress notifications
-- Background job status
-- AI/ML processing events
-- Live activity feeds
-
-Yet developers often reach for WebSockets or SignalR, introducing unnecessary complexity for simple push scenarios.
-
-**PushStream gives you real-time behavior without real-time complexity.**
-
----
+- **Zero dependencies** - Pure JavaScript, no external libraries
+- **Tiny footprint** - Less than 5KB minified
+- **TypeScript support** - Full type definitions included
+- **Auto-reconnection** - Exponential backoff with jitter to prevent thundering herd
+- **Event-driven API** - Familiar `on()`/`off()` subscription pattern
+- **JSON parsing** - Automatic payload parsing
+- **Connection state** - Track connection status with built-in events
+- **Universal** - Works in browsers and Node.js
 
 ## Installation
 
-### Server (.NET)
-
-```bash
-dotnet add package PushStream.AspNetCore
-```
-
-### Client (npm)
+### npm / yarn / pnpm
 
 ```bash
 npm install pushstream-client
+# or
+yarn add pushstream-client
+# or
+pnpm add pushstream-client
 ```
 
-### Client (CDN)
+### CDN / Script Tag
 
 ```html
 <script src="https://unpkg.com/pushstream-client/dist/pushstream.min.js"></script>
@@ -49,139 +34,329 @@ npm install pushstream-client
 </script>
 ```
 
----
-
 ## Quick Start
-
-### Server (ASP.NET Core)
-
-```csharp
-// 1. Register PushStream services
-builder.Services.AddPushStream();
-
-// 2. Map an SSE endpoint
-app.MapEventStream("/events");
-
-// 3. Publish events from anywhere
-public class TaskService
-{
-    private readonly IEventPublisher _publisher;
-
-    public TaskService(IEventPublisher publisher)
-    {
-        _publisher = publisher;
-    }
-
-    public async Task ProcessTaskAsync(string taskId)
-    {
-        await _publisher.PublishAsync("task.started", new { taskId });
-        
-        // ... do work ...
-        
-        await _publisher.PublishAsync("task.progress", new { taskId, percentage = 50 });
-        
-        // ... complete work ...
-        
-        await _publisher.PublishAsync("task.completed", new { taskId, result = "Success" });
-    }
-}
-```
-
-### Client (JavaScript/TypeScript)
 
 ```javascript
 import { EventClient } from 'pushstream-client';
 
+// Create client
 const client = new EventClient('/events');
 
-client.on('task.started', (data) => {
-  console.log(`Task ${data.taskId} started`);
-});
-
+// Subscribe to events
 client.on('task.progress', (data) => {
-  console.log(`Progress: ${data.percentage}%`);
+  console.log(`Task ${data.taskId}: ${data.percentage}%`);
 });
 
-client.on('task.completed', (data) => {
-  console.log(`Completed: ${data.result}`);
+client.on('task.complete', (data) => {
+  console.log(`Task ${data.taskId} completed!`);
+});
+
+// Handle errors
+client.on('stream.error', (error) => {
+  console.error('Connection error:', error.message);
+});
+
+// Connect
+client.connect();
+
+// Later: disconnect
+client.disconnect();
+```
+
+## TypeScript
+
+Full TypeScript support is included out of the box. No additional `@types` packages needed.
+
+```typescript
+import { EventClient, ConnectionState, BuiltInEvents } from 'pushstream-client';
+
+// Define your event payload types
+interface OrderUpdate {
+  orderId: string;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  timestamp: string;
+}
+
+interface TaskProgress {
+  taskId: string;
+  percentage: number;
+}
+
+const client = new EventClient('/events', {
+  reconnect: true,
+  maxReconnectAttempts: 5
+});
+
+// Generic type parameter for type-safe callbacks
+client.on<OrderUpdate>('order.updated', (data) => {
+  console.log(data.orderId);   // string
+  console.log(data.status);    // 'pending' | 'processing' | 'shipped' | 'delivered'
+});
+
+client.on<TaskProgress>('task.progress', (data) => {
+  console.log(data.percentage); // number
+});
+
+// Built-in events are also typed
+client.on('stream.error', (error) => {
+  console.error(error.message);
 });
 
 client.connect();
 ```
 
-That's it. No connection management. No reconnection logic. No heartbeat handling.
+### Available Types
 
----
-
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| **Simple API** | Event-centric design that matches how you think |
-| **Auto-reconnect** | Client handles connection drops gracefully |
-| **Heartbeats** | Built-in keep-alive, no configuration needed |
-| **Named Events** | Predictable `domain.action` event naming |
-| **Type Safety** | Strongly typed events on the server |
-| **Framework Agnostic** | Core logic works anywhere, adapters for popular frameworks |
-
----
-
-## When to Use PushStream
-
-✅ **Use PushStream when:**
-- Updates flow only from server to client
-- You need instant feedback for long-running operations
-- You want real-time without managing WebSocket complexity
-
-❌ **Don't use PushStream when:**
-- You need bi-directional messaging (use SignalR/WebSockets)
-- You're building a chat application with client-to-client messaging
-- You need request-response patterns over the same connection
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Problem Statement](docs/01-problem-statement.md) | Why this project exists |
-| [Why SSE?](docs/02-why-see.md) | Technical justification for SSE over alternatives |
-| [Architecture](docs/03-architecture.md) | System design and component overview |
-| [Design Decisions](docs/04-design-decision.md) | Key architectural choices and rationale |
-| [API Design](docs/05-api-design.md) | Public API reference |
-| [Getting Started](docs/07-getting-started.md) | Step-by-step setup guide |
-| [Security & Auth](docs/08-security-and-auth.md) | Authentication considerations |
-| [Future Roadmap](docs/06-future-roadmap.md) | What's coming next |
-
----
-
-## Project Structure
-
-```
-PushStream/
-├── src/
-│   ├── server/
-│   │   ├── PushStream.Core/         # Core abstractions (NuGet)
-│   │   ├── PushStream.AspNetCore/   # ASP.NET Core integration (NuGet)
-│   │   └── PushStream.DemoApi/      # Demo application
-│   └── client/
-│       └── pushstream-js/           # JavaScript client (npm: pushstream-client)
-├── tests/
-│   ├── PushStream.Core.Tests/
-│   └── PushStream.AspNetCore.Tests/
-├── docs/                            # Documentation
-├── specs/                           # Specifications
-└── README.md
+```typescript
+import {
+  // Classes
+  EventClient,
+  SubscriptionManager,
+  
+  // Types
+  EventClientOptions,
+  EventCallback,
+  ConnectionStateValue,
+  
+  // Constants
+  ConnectionState,
+  BuiltInEvents,
+  DefaultOptions,
+  
+  // Built-in event data types
+  StreamOpenEvent,
+  StreamCloseEvent,
+  StreamErrorEvent,
+  StreamStateChangeEvent
+} from 'pushstream-client';
 ```
 
----
+## API Reference
+
+### `new EventClient(url, options?)`
+
+Creates a new EventClient instance.
+
+**Parameters:**
+- `url` (string) - The SSE endpoint URL (relative or absolute)
+- `options` (object, optional):
+  - `reconnect` (boolean, default: `true`) - Enable automatic reconnection
+  - `reconnectInterval` (number, default: `1000`) - Base delay in milliseconds
+  - `maxReconnectAttempts` (number, default: `10`) - Maximum retry attempts
+  - `maxReconnectDelay` (number, default: `30000`) - Maximum backoff delay
+  - `withCredentials` (boolean, default: `false`) - Include cookies in CORS requests
+
+```javascript
+const client = new EventClient('/events', {
+  reconnect: true,
+  reconnectInterval: 2000,
+  maxReconnectAttempts: 5
+});
+```
+
+### `connect()`
+
+Establish an SSE connection to the server. This method is idempotent - calling it while already connected has no effect.
+
+```javascript
+client.connect();
+```
+
+### `disconnect()`
+
+Close the SSE connection. After calling `disconnect()`, no automatic reconnection will be attempted.
+
+```javascript
+client.disconnect();
+```
+
+### `on(event, callback)`
+
+Subscribe to an event. Returns the client instance for chaining.
+
+```javascript
+client
+  .on('task.progress', handleProgress)
+  .on('task.complete', handleComplete);
+```
+
+### `off(event, callback?)`
+
+Unsubscribe from an event. If `callback` is omitted, removes all listeners for that event.
+
+```javascript
+// Remove specific callback
+client.off('task.progress', handleProgress);
+
+// Remove all callbacks for event
+client.off('task.progress');
+```
+
+### `state` (property)
+
+Get the current connection state.
+
+```javascript
+console.log(client.state); // 'disconnected' | 'connecting' | 'connected'
+```
+
+## Built-in Events
+
+| Event | Description | Payload |
+|-------|-------------|---------|
+| `stream.open` | Connection established | `{ url: string }` |
+| `stream.close` | Connection closed | `{ manual: boolean }` |
+| `stream.error` | Error occurred | `{ message: string, ... }` |
+| `stream.statechange` | State changed | `{ previousState, currentState }` |
+
+```javascript
+client.on('stream.open', () => {
+  console.log('Connected!');
+});
+
+client.on('stream.close', ({ manual }) => {
+  console.log(manual ? 'Disconnected by user' : 'Connection lost');
+});
+
+client.on('stream.error', ({ message }) => {
+  console.error('Error:', message);
+});
+
+client.on('stream.statechange', ({ previousState, currentState }) => {
+  console.log(`State: ${previousState} -> ${currentState}`);
+});
+```
+
+## Connection States
+
+| State | Description |
+|-------|-------------|
+| `disconnected` | Not connected to server |
+| `connecting` | Attempting to establish connection |
+| `connected` | Connected and receiving events |
+
+## Reconnection Behavior
+
+By default, the client automatically reconnects when the connection is lost:
+
+1. Uses **exponential backoff**: delays increase with each failed attempt
+2. Adds **jitter** (random delay) to prevent all clients reconnecting simultaneously
+3. Respects **max attempts**: stops after `maxReconnectAttempts` failures
+4. **Preserves subscriptions**: no need to re-register event handlers after reconnection
+
+To disable auto-reconnection:
+
+```javascript
+const client = new EventClient('/events', { reconnect: false });
+```
+
+## Authentication
+
+Since `EventSource` cannot send custom headers, use query parameters for authentication:
+
+```javascript
+const client = new EventClient('/events?token=your-jwt-token');
+client.connect();
+```
+
+For cookie-based auth with CORS:
+
+```javascript
+const client = new EventClient('https://api.example.com/events', {
+  withCredentials: true
+});
+```
+
+## Browser Support
+
+| Browser | Version |
+|---------|---------|
+| Chrome | 60+ |
+| Firefox | 55+ |
+| Safari | 11+ |
+| Edge | 79+ |
+
+## Node.js Support
+
+For Node.js 18+, use with an EventSource polyfill:
+
+```javascript
+import { EventSource } from 'eventsource';
+globalThis.EventSource = EventSource;
+
+import { EventClient } from 'pushstream-client';
+// ... use as normal
+```
+
+## Examples
+
+### Progress Tracking
+
+```javascript
+const client = new EventClient('/api/upload/events?uploadId=abc123');
+
+client.on('upload.progress', ({ percentage, bytesUploaded }) => {
+  updateProgressBar(percentage);
+});
+
+client.on('upload.complete', ({ fileUrl }) => {
+  showSuccess(fileUrl);
+  client.disconnect();
+});
+
+client.on('upload.error', ({ message }) => {
+  showError(message);
+  client.disconnect();
+});
+
+client.connect();
+```
+
+### Live Notifications
+
+```javascript
+const client = new EventClient('/api/notifications');
+
+client.on('notification', ({ title, body, type }) => {
+  showNotification(title, body, type);
+});
+
+client.on('stream.error', () => {
+  showOfflineIndicator();
+});
+
+client.on('stream.open', () => {
+  hideOfflineIndicator();
+});
+
+client.connect();
+```
+
+## TypeScript
+
+TypeScript definitions are planned for a future release. For now, you can create a basic `.d.ts` file:
+
+```typescript
+declare module 'pushstream-client' {
+  export class EventClient {
+    constructor(url: string, options?: EventClientOptions);
+    connect(): void;
+    disconnect(): void;
+    on(event: string, callback: (data: any) => void): this;
+    off(event: string, callback?: (data: any) => void): this;
+    readonly state: 'disconnected' | 'connecting' | 'connected';
+  }
+
+  export interface EventClientOptions {
+    reconnect?: boolean;
+    reconnectInterval?: number;
+    maxReconnectAttempts?: number;
+    maxReconnectDelay?: number;
+    withCredentials?: boolean;
+  }
+}
+```
 
 ## License
 
 MIT
-
----
-
-## Contributing
-
-Contributions are welcome! Please read the documentation first to understand the design philosophy and non-goals of the project.
