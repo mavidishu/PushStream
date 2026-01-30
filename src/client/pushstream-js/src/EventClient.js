@@ -41,6 +41,7 @@ export class EventClient {
     this._reconnectTimer = null;
     this._manualDisconnect = false;
     this._registeredEventTypes = new Set();
+    this._lastEventId = null;
   }
 
   /**
@@ -57,6 +58,14 @@ export class EventClient {
    */
   get url() {
     return this._url;
+  }
+
+  /**
+   * Get the last event ID received from the server.
+   * @returns {string|null} The last event ID, or null if none received
+   */
+  get lastEventId() {
+    return this._lastEventId;
   }
 
   /**
@@ -300,6 +309,11 @@ export class EventClient {
    * @private
    */
   _handleMessage(eventType, sseEvent) {
+    // Track event ID if present (for reconnection support)
+    if (sseEvent.lastEventId) {
+      this._lastEventId = sseEvent.lastEventId;
+    }
+
     let data;
     
     try {
@@ -349,4 +363,3 @@ export class EventClient {
     this._registeredEventTypes.clear();
   }
 }
-

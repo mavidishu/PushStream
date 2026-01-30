@@ -59,10 +59,10 @@ class MockEventSource {
     }
   }
 
-  _simulateMessage(type, data) {
+  _simulateMessage(type, data, lastEventId = null) {
     const listeners = this._listeners.get(type);
     if (listeners) {
-      const event = { type, data: JSON.stringify(data) };
+      const event = { type, data: JSON.stringify(data), lastEventId };
       listeners.forEach(listener => listener(event));
     }
   }
@@ -551,5 +551,85 @@ describe('EventClient', () => {
       assert.strictEqual(count, 2);
     });
   });
-});
 
+  describe('lastEventId', () => {
+    it('should start as null', () => {
+      assert.strictEqual(client.lastEventId, null);
+    });
+
+    it('should remain null after connection without events', () => {
+      client.connect();
+      client._eventSource._simulateOpen();
+      
+      assert.strictEqual(client.lastEventId, null);
+    });
+
+    it('should update when event with ID is received', () => {
+      client.on('test.event', () => {});
+      client.connect();
+      client._eventSource._simulateOpen();
+      
+      client._eventSource._simulateMessage('test.event', { data: 'hello' }, 'evt_123');
+      
+      assert.strictEqual(client.lastEventId, 'evt_123');
+    });
+
+    it('should update to latest event ID', () => {
+      client.on('test.event', () => {});
+      client.connect();
+      client._eventSource._simulateOpen();
+      
+      client._eventSource._simulateMessage('test.event', { data: 'first' }, 'evt_001');
+      assert.strictEqual(client.lastEventId, 'evt_001');
+      
+      client._eventSource._simulateMessage('test.event', { data: 'second' }, 'evt_002');
+      assert.strictEqual(client.lastEventId, 'evt_002');
+      
+      client._eventSource._simulateMessage('test.event', { data: 'third' }, 'evt_003');
+      assert.strictEqual(client.lastEventId, 'evt_003');
+    });
+
+    it('should not update when event has no ID', () => {
+      client.on('test.event', () => {});
+      client.connect();
+      client._eventSource._simulateOpen();
+      
+      client._eventSource._simulateMessage('test.event', { data: 'hello' }, 'evt_123');
+      assert.strictEqual(client.lastEventId, 'evt_123');
+      
+      // Message without event ID should not change lastEventId
+      client._eventSource._simulateMessage('test.event', { data: 'world' }, null);
+      assert.strictEqual(client.lastEventId, 'evt_123');
+    });
+
+    it('should persist after disconnect and reconnect', () => {
+      client.on('test.event', () => {});
+      client.connect();
+      client._eventSource._simulateOpen();
+      
+      client._eventSource._simulateMessage('test.event', { data: 'hello' }, 'evt_abc');
+      assert.strictEqual(client.lastEventId, 'evt_abc');
+      
+      client.disconnect();
+      assert.strictEqual(client.lastEventId, 'evt_abc');
+      
+      client.connect();
+      client._eventSource._simulateOpen();
+      assert.strictEqual(client.lastEventId, 'evt_abc');
+    });
+
+    it('should be accessible from event callback', () => {
+      let capturedId = null;
+      
+      client.on('test.event', () => {
+        capturedId = client.lastEventId;
+      });
+      
+      client.connect();
+      client._eventSource._simulateOpen();
+      client._eventSource._simulateMessage('test.event', { data: 'hello' }, 'evt_xyz');
+      
+      assert.strictEqual(capturedId, 'evt_xyz');
+    });
+  });
+});

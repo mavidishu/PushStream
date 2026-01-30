@@ -26,8 +26,8 @@
   "main": "dist/pushstream.cjs.js",
   "module": "dist/pushstream.esm.js",
   "browser": "dist/pushstream.min.js",
-  "types": "dist/pushstream.d.ts",
-  "typings": "dist/pushstream.d.ts",
+  "types": "pushstream.d.ts",
+  "typings": "pushstream.d.ts",
   "unpkg": "dist/pushstream.min.js",
   "jsdelivr": "dist/pushstream.min.js",
   "exports": {
@@ -39,6 +39,7 @@
   },
   "files": [
     "dist",
+    "pushstream.d.ts",
     "README.md",
     "LICENSE"
   ],
