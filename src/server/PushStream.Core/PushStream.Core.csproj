@@ -1,26 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<RootNamespace>PushStream.Core</RootNamespace>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>PushStream.Core</RootNamespace>
+    
+    <!-- Package Metadata -->
+    <PackageId>PushStream.Core</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Dishu Mavi</Authors>
+    <Company>PushStream</Company>
+    <Description>Framework-agnostic core library for PushStream - a simple, opinionated abstraction over Server-Sent Events (SSE) for real-time server-to-client communication.</Description>
+    <PackageTags>sse;server-sent-events;real-time;push;streaming;dotnet</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/mavidishu/PushStream</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mavidishu/PushStream</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 
-		<!-- Package Metadata -->
-		<PackageId>PushStream.Core</PackageId>
-		<Version>0.1.0</Version>
-		<Authors>Dishu Mavi</Authors>
-		<Company>PushStream</Company>
-		<Description>Framework-agnostic core library for PushStream - a simple, opinionated abstraction over Server-Sent Events (SSE) for real-time server-to-client communication.</Description>
-		<PackageTags>sse;server-sent-events;real-time;push;streaming;dotnet</PackageTags>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/mavidishu/PushStream</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/mavidishu/PushStream</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	</PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
 
 </Project>
-
-
-

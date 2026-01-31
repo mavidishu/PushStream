@@ -34,13 +34,21 @@ public sealed class SseFormatter : ISseFormatter
     }
 
     /// <inheritdoc />
-    public string FormatEvent<T>(string eventName, T payload)
+    public string FormatEvent<T>(string eventName, T payload, string? eventId = null)
     {
         ArgumentNullException.ThrowIfNull(eventName);
 
         var json = JsonSerializer.Serialize(payload, _jsonOptions);
         
         var builder = new StringBuilder();
+        
+        // Event ID (must come before event/data per SSE spec)
+        if (!string.IsNullOrEmpty(eventId))
+        {
+            builder.Append("id: ");
+            builder.Append(eventId);
+            builder.Append('\n');
+        }
         
         // Event name
         builder.Append("event: ");

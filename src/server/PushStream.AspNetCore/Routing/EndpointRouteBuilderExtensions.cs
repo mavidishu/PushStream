@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PushStream.AspNetCore.Connections;
 using PushStream.AspNetCore.Options;
@@ -63,6 +64,7 @@ public static class EndpointRouteBuilderExtensions
             var connectionStore = context.RequestServices.GetRequiredService<IConnectionStore>();
             var formatter = context.RequestServices.GetRequiredService<ISseFormatter>();
             var options = context.RequestServices.GetRequiredService<IOptions<PushStreamOptions>>();
+            var loggerFactory = context.RequestServices.GetRequiredService<ILoggerFactory>();
 
             // Handle the SSE connection
             await SseConnectionHandler.HandleAsync(
@@ -70,6 +72,7 @@ public static class EndpointRouteBuilderExtensions
                 connectionStore,
                 formatter,
                 options,
+                loggerFactory,
                 clientIdResolver);
         });
     }
@@ -104,6 +107,7 @@ public static class EndpointRouteBuilderExtensions
             var connectionStore = context.RequestServices.GetRequiredService<IConnectionStore>();
             var formatter = context.RequestServices.GetRequiredService<ISseFormatter>();
             var options = context.RequestServices.GetRequiredService<IOptions<PushStreamOptions>>();
+            var loggerFactory = context.RequestServices.GetRequiredService<ILoggerFactory>();
 
             // Create resolver that includes route values
             var routeValues = context.GetRouteData()?.Values ?? new RouteValueDictionary();
@@ -115,6 +119,7 @@ public static class EndpointRouteBuilderExtensions
                 connectionStore,
                 formatter,
                 options,
+                loggerFactory,
                 ResolveClientId);
         });
     }

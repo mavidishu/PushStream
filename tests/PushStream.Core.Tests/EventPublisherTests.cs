@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using PushStream.Core.Abstractions;
 using PushStream.Core.Formatting;
 using PushStream.Core.Publishing;
@@ -19,9 +20,9 @@ public class EventPublisherTests
 
     public EventPublisherTests()
     {
-        _store = new InMemoryConnectionStore();
+        _store = new InMemoryConnectionStore(NullLogger<InMemoryConnectionStore>.Instance);
         _formatter = new SseFormatter();
-        _publisher = new EventPublisher(_store, _formatter);
+        _publisher = new EventPublisher(_store, _formatter, NullLogger<EventPublisher>.Instance);
     }
 
     #region AC-1: Broadcast Publishing
@@ -311,7 +312,7 @@ public class EventPublisherTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(
-            () => new EventPublisher(null!, _formatter));
+            () => new EventPublisher(null!, _formatter, NullLogger<EventPublisher>.Instance));
     }
 
     [Fact]
@@ -319,7 +320,15 @@ public class EventPublisherTests
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(
-            () => new EventPublisher(_store, null!));
+            () => new EventPublisher(_store, null!, NullLogger<EventPublisher>.Instance));
+    }
+
+    [Fact]
+    public void Constructor_NullLogger_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(
+            () => new EventPublisher(_store, _formatter, null!));
     }
 
     #endregion
@@ -338,6 +347,93 @@ public class EventPublisherTests
         // Act & Assert
         await Assert.ThrowsAsync<OperationCanceledException>(
             () => _publisher.PublishAsync("test", new { }, cts.Token));
+    }
+
+    #endregion
+
+    #region Event ID Support
+
+    [Fact]
+    public async Task PublishAsync_WithEventId_FormatsCorrectly()
+    {
+        // Arrange
+        var conn = new MockClientConnection("conn-1", "user-1");
+        await _store.AddAsync(conn);
+
+        // Act
+        await _publisher.PublishAsync("task.progress", new { taskId = "123" }, "evt_abc");
+
+        // Assert
+        var data = conn.LastWrittenData;
+        Assert.NotNull(data);
+        Assert.Contains("id: evt_abc", data);
+        Assert.Contains("event: task.progress", data);
+    }
+
+    [Fact]
+    public async Task PublishAsync_WithNullEventId_OmitsIdField()
+    {
+        // Arrange
+        var conn = new MockClientConnection("conn-1", "user-1");
+        await _store.AddAsync(conn);
+
+        // Act
+        await _publisher.PublishAsync("task.progress", new { taskId = "123" }, eventId: null);
+
+        // Assert
+        var data = conn.LastWrittenData;
+        Assert.NotNull(data);
+        Assert.DoesNotContain("id:", data);
+    }
+
+    [Fact]
+    public async Task PublishToAsync_WithEventId_FormatsCorrectly()
+    {
+        // Arrange
+        var conn = new MockClientConnection("conn-1", "user-1");
+        await _store.AddAsync(conn);
+
+        // Act
+        await _publisher.PublishToAsync("user-1", "notification", new { count = 5 }, "evt_xyz");
+
+        // Assert
+        var data = conn.LastWrittenData;
+        Assert.NotNull(data);
+        Assert.Contains("id: evt_xyz", data);
+        Assert.Contains("event: notification", data);
+    }
+
+    [Fact]
+    public async Task PublishToAsync_WithNullEventId_OmitsIdField()
+    {
+        // Arrange
+        var conn = new MockClientConnection("conn-1", "user-1");
+        await _store.AddAsync(conn);
+
+        // Act
+        await _publisher.PublishToAsync("user-1", "notification", new { count = 5 }, eventId: null);
+
+        // Assert
+        var data = conn.LastWrittenData;
+        Assert.NotNull(data);
+        Assert.DoesNotContain("id:", data);
+    }
+
+    [Fact]
+    public async Task PublishAsync_WithoutEventIdOverload_BackwardCompatible()
+    {
+        // Arrange
+        var conn = new MockClientConnection("conn-1", "user-1");
+        await _store.AddAsync(conn);
+
+        // Act - Using the original overload without eventId
+        await _publisher.PublishAsync("test.event", new { value = 42 });
+
+        // Assert
+        var data = conn.LastWrittenData;
+        Assert.NotNull(data);
+        Assert.Contains("event: test.event", data);
+        Assert.DoesNotContain("id:", data);
     }
 
     #endregion

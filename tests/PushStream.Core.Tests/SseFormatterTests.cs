@@ -242,6 +242,95 @@ public class SseFormatterTests
 
     #endregion
 
+    #region Event ID Support
+
+    [Fact]
+    public void FormatEvent_WithEventId_IncludesIdField()
+    {
+        // Arrange
+        var payload = new { message = "hello" };
+
+        // Act
+        var result = _formatter.FormatEvent("test.event", payload, "evt_123");
+
+        // Assert
+        Assert.Contains("id: evt_123", result);
+    }
+
+    [Fact]
+    public void FormatEvent_WithoutEventId_OmitsIdField()
+    {
+        // Arrange
+        var payload = new { message = "hello" };
+
+        // Act
+        var result = _formatter.FormatEvent("test.event", payload);
+
+        // Assert
+        Assert.DoesNotContain("id:", result);
+    }
+
+    [Fact]
+    public void FormatEvent_WithNullEventId_OmitsIdField()
+    {
+        // Arrange
+        var payload = new { message = "hello" };
+
+        // Act
+        var result = _formatter.FormatEvent("test.event", payload, null);
+
+        // Assert
+        Assert.DoesNotContain("id:", result);
+    }
+
+    [Fact]
+    public void FormatEvent_WithEmptyEventId_OmitsIdField()
+    {
+        // Arrange
+        var payload = new { message = "hello" };
+
+        // Act
+        var result = _formatter.FormatEvent("test.event", payload, "");
+
+        // Assert
+        Assert.DoesNotContain("id:", result);
+    }
+
+    [Fact]
+    public void FormatEvent_WithEventId_IdComesBeforeEvent()
+    {
+        // Arrange
+        var payload = new { message = "hello" };
+
+        // Act
+        var result = _formatter.FormatEvent("test.event", payload, "evt_456");
+
+        // Assert - Per SSE spec, id should come before event
+        var lines = result.Split('\n');
+        Assert.StartsWith("id: evt_456", lines[0]);
+        Assert.StartsWith("event: test.event", lines[1]);
+    }
+
+    [Fact]
+    public void FormatEvent_WithEventId_CompleteFormat()
+    {
+        // Arrange
+        var payload = new { taskId = "123", status = "complete" };
+
+        // Act
+        var result = _formatter.FormatEvent("task.completed", payload, "evt_789");
+
+        // Assert
+        var lines = result.Split('\n');
+        Assert.Equal("id: evt_789", lines[0]);
+        Assert.Equal("event: task.completed", lines[1]);
+        Assert.StartsWith("data: ", lines[2]);
+        Assert.Equal("", lines[3]); // Empty line between data and end
+        Assert.Equal("", lines[4]); // Trailing empty from final \n
+    }
+
+    #endregion
+
     #region Additional Tests
 
     [Fact]
@@ -300,4 +389,3 @@ public class SseFormatterTests
 
     #endregion
 }
-

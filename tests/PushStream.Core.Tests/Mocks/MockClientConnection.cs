@@ -10,10 +10,11 @@ public sealed class MockClientConnection : IClientConnection
     private readonly List<string> _writtenData = new();
     private bool _isConnected = true;
 
-    public MockClientConnection(string connectionId, string clientId)
+    public MockClientConnection(string connectionId, string clientId, string? lastEventId = null)
     {
         ConnectionId = connectionId;
         ClientId = clientId;
+        LastEventId = lastEventId;
     }
 
     public string ConnectionId { get; }
@@ -21,6 +22,8 @@ public sealed class MockClientConnection : IClientConnection
     public string ClientId { get; }
 
     public bool IsConnected => _isConnected;
+
+    public string? LastEventId { get; }
 
     /// <summary>
     /// Gets all data that has been written to this connection.
