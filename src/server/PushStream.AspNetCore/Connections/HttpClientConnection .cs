@@ -22,16 +22,19 @@ public sealed class HttpClientConnection : IClientConnection, IAsyncDisposable
     /// <param name="clientId">Logical client identifier for targeting.</param>
     /// <param name="response">The HTTP response to write to.</param>
     /// <param name="requestAborted">Cancellation token that fires when the request is aborted.</param>
+    /// <param name="lastEventId">The Last-Event-ID header value from the client request, if provided.</param>
     public HttpClientConnection(
         string connectionId,
         string clientId,
         HttpResponse response,
-        CancellationToken requestAborted)
+        CancellationToken requestAborted,
+        string? lastEventId = null)
     {
         ConnectionId = connectionId ?? throw new ArgumentNullException(nameof(connectionId));
         ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
         _response = response ?? throw new ArgumentNullException(nameof(response));
         _requestAborted = requestAborted;
+        LastEventId = lastEventId;
     }
 
     /// <inheritdoc />
@@ -42,6 +45,9 @@ public sealed class HttpClientConnection : IClientConnection, IAsyncDisposable
 
     /// <inheritdoc />
     public bool IsConnected => !_isDisposed && !_requestAborted.IsCancellationRequested;
+
+    /// <inheritdoc />
+    public string? LastEventId { get; }
 
     /// <inheritdoc />
     public async Task WriteAsync(string data, CancellationToken cancellationToken = default)

@@ -145,6 +145,49 @@ public class HttpClientConnectionTests
 
     #endregion
 
+    #region Last Event ID Support
+
+    [Fact]
+    public void LastEventId_ReturnsNull_WhenNotProvided()
+    {
+        // Arrange
+        var response = CreateMockResponse(new MemoryStream());
+        
+        // Act
+        var connection = new HttpClientConnection("conn-1", "user-1", response, CancellationToken.None);
+
+        // Assert
+        Assert.Null(connection.LastEventId);
+    }
+
+    [Fact]
+    public void LastEventId_ReturnsValue_WhenProvided()
+    {
+        // Arrange
+        var response = CreateMockResponse(new MemoryStream());
+        
+        // Act
+        var connection = new HttpClientConnection("conn-1", "user-1", response, CancellationToken.None, "evt_12345");
+
+        // Assert
+        Assert.Equal("evt_12345", connection.LastEventId);
+    }
+
+    [Fact]
+    public void LastEventId_CanBeEmptyString()
+    {
+        // Arrange
+        var response = CreateMockResponse(new MemoryStream());
+        
+        // Act
+        var connection = new HttpClientConnection("conn-1", "user-1", response, CancellationToken.None, "");
+
+        // Assert
+        Assert.Equal("", connection.LastEventId);
+    }
+
+    #endregion
+
     #region Error Handling
 
     [Fact]

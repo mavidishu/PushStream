@@ -24,6 +24,13 @@ public interface IClientConnection
     bool IsConnected { get; }
 
     /// <summary>
+    /// Gets the last event ID sent by the client on reconnection.
+    /// This corresponds to the Last-Event-ID header in the HTTP request.
+    /// Null if the client did not provide a last event ID.
+    /// </summary>
+    string? LastEventId { get; }
+
+    /// <summary>
     /// Writes raw SSE-formatted data to the client stream.
     /// </summary>
     /// <param name="data">The SSE-formatted string to write.</param>
@@ -31,4 +38,3 @@ public interface IClientConnection
     /// <returns>A task representing the async write operation.</returns>
     Task WriteAsync(string data, CancellationToken cancellationToken = default);
 }
-
