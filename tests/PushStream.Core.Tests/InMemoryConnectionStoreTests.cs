@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using PushStream.Core.Abstractions;
 using PushStream.Core.Storage;
 using PushStream.Core.Tests.Mocks;
@@ -15,7 +16,7 @@ public class InMemoryConnectionStoreTests
 
     public InMemoryConnectionStoreTests()
     {
-        _store = new InMemoryConnectionStore();
+        _store = new InMemoryConnectionStore(NullLogger<InMemoryConnectionStore>.Instance);
     }
 
     #region AC-4: Register Connection
@@ -348,4 +349,3 @@ public class InMemoryConnectionStoreTests
 
     #endregion
 }
-

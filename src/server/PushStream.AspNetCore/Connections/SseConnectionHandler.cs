@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PushStream.AspNetCore.Options;
 using PushStream.Core.Abstractions;
@@ -18,15 +20,19 @@ internal static class SseConnectionHandler
     /// <param name="connectionStore">The connection store.</param>
     /// <param name="formatter">The SSE formatter.</param>
     /// <param name="options">PushStream options.</param>
+    /// <param name="loggerFactory">The logger factory for creating loggers.</param>
     /// <param name="clientIdResolver">Optional per-endpoint client ID resolver.</param>
     public static async Task HandleAsync(
         HttpContext context,
         IConnectionStore connectionStore,
         ISseFormatter formatter,
         IOptions<PushStreamOptions> options,
+        ILoggerFactory loggerFactory,
         Func<HttpContext, string?>? clientIdResolver = null)
     {
+        var logger = loggerFactory.CreateLogger("PushStream.AspNetCore.SseConnectionHandler");
         var pushStreamOptions = options.Value;
+        var stopwatch = Stopwatch.StartNew();
         
         // Resolve client identifier
         var resolver = clientIdResolver ?? pushStreamOptions.ClientIdResolver;
@@ -41,6 +47,9 @@ internal static class SseConnectionHandler
         }
 
         var connectionId = Guid.NewGuid().ToString();
+        
+        // Read Last-Event-ID header for reconnection support
+        var lastEventId = context.Request.Headers["Last-Event-ID"].FirstOrDefault();
 
         // Configure SSE response headers
         ConfigureSseResponse(context.Response);
@@ -50,7 +59,8 @@ internal static class SseConnectionHandler
             connectionId,
             clientId,
             context.Response,
-            context.RequestAborted);
+            context.RequestAborted,
+            lastEventId);
 
         await using (connection)
         {
@@ -58,6 +68,23 @@ internal static class SseConnectionHandler
             {
                 // Register connection
                 await connectionStore.AddAsync(connection);
+
+                // Log connection based on whether it's a reconnection
+                if (!string.IsNullOrEmpty(lastEventId))
+                {
+                    logger.LogInformation(
+                        "Client reconnected. ConnectionId: {ConnectionId}, ClientId: {ClientId}, LastEventId: {LastEventId}",
+                        connectionId,
+                        clientId,
+                        lastEventId);
+                }
+                else
+                {
+                    logger.LogInformation(
+                        "Client connected. ConnectionId: {ConnectionId}, ClientId: {ClientId}",
+                        connectionId,
+                        clientId);
+                }
 
                 // Send initial heartbeat if configured
                 if (pushStreamOptions.SendInitialHeartbeat)
@@ -70,10 +97,26 @@ internal static class SseConnectionHandler
                 // This keeps the response open for SSE streaming
                 await WaitForDisconnectionAsync(context.RequestAborted);
             }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogError(
+                    ex,
+                    "Error handling SSE connection. ConnectionId: {ConnectionId}, ClientId: {ClientId}",
+                    connectionId,
+                    clientId);
+                throw;
+            }
             finally
             {
                 // Always remove connection from store
                 await connectionStore.RemoveAsync(connectionId);
+                stopwatch.Stop();
+
+                logger.LogInformation(
+                    "Client disconnected. ConnectionId: {ConnectionId}, ClientId: {ClientId}, Duration: {Duration}ms",
+                    connectionId,
+                    clientId,
+                    stopwatch.ElapsedMilliseconds);
             }
         }
     }
