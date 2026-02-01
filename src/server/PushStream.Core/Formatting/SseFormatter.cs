@@ -77,4 +77,18 @@ public sealed class SseFormatter : ISseFormatter
         // SSE comments start with a colon and are ignored by clients
         return ": heartbeat\n\n";
     }
+
+    /// <inheritdoc />
+    public string FormatRetry(TimeSpan interval)
+    {
+        if (interval < TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(interval), 
+                "Retry interval cannot be negative.");
+        }
+
+        // SSE retry field specifies milliseconds as an integer
+        return $"retry: {(long)interval.TotalMilliseconds}\n\n";
+    }
 }

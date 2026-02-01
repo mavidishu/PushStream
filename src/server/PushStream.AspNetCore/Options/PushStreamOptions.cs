@@ -30,4 +30,15 @@ public class PushStreamOptions
     /// This can help verify the connection is working. Default is true.
     /// </summary>
     public bool SendInitialHeartbeat { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the retry interval sent to clients for reconnection.
+    /// This tells browsers how long to wait before attempting to reconnect
+    /// after a connection loss. Default is 3 seconds.
+    /// </summary>
+    /// <remarks>
+    /// The retry interval is sent as an SSE `retry:` field at the start of
+    /// the connection. Browsers automatically use this value when reconnecting.
+    /// </remarks>
+    public TimeSpan RetryInterval { get; set; } = TimeSpan.FromSeconds(3);
 }
