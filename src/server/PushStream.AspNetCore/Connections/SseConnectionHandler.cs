@@ -86,6 +86,10 @@ internal static class SseConnectionHandler
                         clientId);
                 }
 
+                // Send retry interval first (tells browser reconnection wait time)
+                var retryMessage = formatter.FormatRetry(pushStreamOptions.RetryInterval);
+                await connection.WriteAsync(retryMessage, context.RequestAborted);
+
                 // Send initial heartbeat if configured
                 if (pushStreamOptions.SendInitialHeartbeat)
                 {

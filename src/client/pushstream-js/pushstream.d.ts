@@ -124,6 +124,12 @@ export const DefaultOptions: Readonly<{
  * - Automatic JSON payload parsing
  * - Connection state tracking
  * - Built-in lifecycle events
+ * - Server-controlled retry intervals (via SSE `retry:` field)
+ *
+ * Note: The server sends a `retry:` field at connection time which the browser's
+ * native EventSource uses automatically for reconnection timing. This is handled
+ * transparently by the browser - the client options provide additional control
+ * for exponential backoff on top of the server-specified base interval.
  *
  * @example
  * ```typescript

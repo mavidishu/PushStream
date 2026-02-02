@@ -20,6 +20,14 @@ public interface ISseFormatter
     /// </summary>
     /// <returns>SSE comment string for heartbeat.</returns>
     string FormatHeartbeat();
+
+    /// <summary>
+    /// Formats a retry interval directive for client reconnection.
+    /// The retry value tells browsers how long to wait before reconnecting.
+    /// </summary>
+    /// <param name="interval">The retry interval to send to clients.</param>
+    /// <returns>SSE retry directive string.</returns>
+    string FormatRetry(TimeSpan interval);
 }
 
 

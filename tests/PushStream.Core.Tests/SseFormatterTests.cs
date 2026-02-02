@@ -388,4 +388,83 @@ public class SseFormatterTests
     }
 
     #endregion
+
+    #region FormatRetry Tests
+
+    [Fact]
+    public void FormatRetry_ReturnsCorrectFormat()
+    {
+        // Act
+        var result = _formatter.FormatRetry(TimeSpan.FromSeconds(5));
+
+        // Assert
+        Assert.Equal("retry: 5000\n\n", result);
+    }
+
+    [Fact]
+    public void FormatRetry_HandlesMilliseconds()
+    {
+        // Act
+        var result = _formatter.FormatRetry(TimeSpan.FromMilliseconds(2500));
+
+        // Assert
+        Assert.Equal("retry: 2500\n\n", result);
+    }
+
+    [Fact]
+    public void FormatRetry_ZeroInterval_Allowed()
+    {
+        // Act
+        var result = _formatter.FormatRetry(TimeSpan.Zero);
+
+        // Assert
+        Assert.Equal("retry: 0\n\n", result);
+    }
+
+    [Fact]
+    public void FormatRetry_NegativeInterval_ThrowsArgumentOutOfRangeException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => _formatter.FormatRetry(TimeSpan.FromSeconds(-1)));
+    }
+
+    [Fact]
+    public void FormatRetry_LargeInterval_HandledCorrectly()
+    {
+        // Arrange - 5 minutes
+        var interval = TimeSpan.FromMinutes(5);
+
+        // Act
+        var result = _formatter.FormatRetry(interval);
+
+        // Assert - 5 minutes = 300000ms
+        Assert.Equal("retry: 300000\n\n", result);
+    }
+
+    [Fact]
+    public void FormatRetry_FractionalMilliseconds_Truncated()
+    {
+        // Arrange - 1.5 seconds = 1500ms (fractional ms truncated by cast to long)
+        var interval = TimeSpan.FromSeconds(1.5);
+
+        // Act
+        var result = _formatter.FormatRetry(interval);
+
+        // Assert
+        Assert.Equal("retry: 1500\n\n", result);
+    }
+
+    [Fact]
+    public void FormatRetry_DefaultThreeSeconds()
+    {
+        // Act
+        var result = _formatter.FormatRetry(TimeSpan.FromSeconds(3));
+
+        // Assert
+        Assert.Equal("retry: 3000\n\n", result);
+    }
+
+    #endregion
+
 }
