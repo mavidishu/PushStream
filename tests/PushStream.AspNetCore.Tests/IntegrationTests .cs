@@ -118,6 +118,53 @@ public class IntegrationTests : IAsyncLifetime
 
     #endregion
 
+    #region Retry Interval
+
+    [Fact]
+    public async Task MapEventStream_SendsRetryIntervalFirst()
+    {
+        // Arrange
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Get, "/events");
+        var response = await _client!.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+        var stream = await response.Content.ReadAsStreamAsync(cts.Token);
+        var reader = new StreamReader(stream, Encoding.UTF8);
+
+        // Read the first line
+        var firstLine = await reader.ReadLineAsync(cts.Token);
+
+        // Assert - First message should be retry interval (default 3000ms)
+        Assert.StartsWith("retry:", firstLine);
+        Assert.Contains("3000", firstLine);
+    }
+
+    [Fact]
+    public async Task MapEventStream_RetryBeforeHeartbeat()
+    {
+        // Arrange
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Get, "/events");
+        var response = await _client!.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+        var stream = await response.Content.ReadAsStreamAsync(cts.Token);
+        var reader = new StreamReader(stream, Encoding.UTF8);
+
+        // Read first few lines
+        var retryLine = await reader.ReadLineAsync(cts.Token);
+        var emptyLine1 = await reader.ReadLineAsync(cts.Token);
+        var heartbeatLine = await reader.ReadLineAsync(cts.Token);
+
+        // Assert - Order should be: retry, empty, heartbeat
+        Assert.StartsWith("retry:", retryLine);
+        Assert.Equal("", emptyLine1);
+        Assert.StartsWith(":", heartbeatLine); // Heartbeat starts with colon (comment)
+    }
+
+    #endregion
+
     #region AC-6: Connection Registration
 
     [Fact]
@@ -182,9 +229,11 @@ public class IntegrationTests : IAsyncLifetime
         var stream = await response.Content.ReadAsStreamAsync(cts.Token);
         var reader = new StreamReader(stream, Encoding.UTF8);
 
-        // Read initial heartbeat
-        await reader.ReadLineAsync(cts.Token);
-        await reader.ReadLineAsync(cts.Token);
+        // Read initial retry and heartbeat
+        await reader.ReadLineAsync(cts.Token); // retry: 3000
+        await reader.ReadLineAsync(cts.Token); // empty line
+        await reader.ReadLineAsync(cts.Token); // : heartbeat
+        await reader.ReadLineAsync(cts.Token); // empty line
 
         // Act - Publish an event
         await publisher.PublishAsync("test.event", new { message = "hello" }, cts.Token);
@@ -312,9 +361,11 @@ public class IntegrationTests : IAsyncLifetime
             var stream = await response1.Content.ReadAsStreamAsync(cts.Token);
             var reader = new StreamReader(stream, Encoding.UTF8);
             
-            // Skip heartbeat
-            await reader.ReadLineAsync(cts.Token);
-            await reader.ReadLineAsync(cts.Token);
+            // Skip retry and heartbeat
+            await reader.ReadLineAsync(cts.Token); // retry: 3000
+            await reader.ReadLineAsync(cts.Token); // empty line
+            await reader.ReadLineAsync(cts.Token); // : heartbeat
+            await reader.ReadLineAsync(cts.Token); // empty line
 
             // Read the targeted event
             var eventLine = await reader.ReadLineAsync(cts.Token);
